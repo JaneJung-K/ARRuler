@@ -14,6 +14,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet var sceneView: ARSCNView!
     
     var dotNodes = [SCNNode]()
+    var textNode = SCNNode()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +44,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        //화면에 사용자가 3번째 터치를 하면 기존에 점을 다 지운다.
+        if dotNodes.count >= 2 {
+            for dot in dotNodes {
+                dot.removeFromParentNode()
+            }
+            dotNodes = [SCNNode]()
+        }
+        
         if let touchLocation = touches.first?.location(in: sceneView) {
             
             if let query = sceneView.raycastQuery(from: touchLocation, allowing: .estimatedPlane, alignment: .any) {
@@ -95,11 +105,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func updateText(text: String, atPosition position: SCNVector3){
+        
+        //updateText함수가 실행될 때 마다 ParentNode에 있는 textNode를 삭제한다
+        
+        textNode.removeFromParentNode()
+        
         let textGeometry = SCNText(string: text, extrusionDepth: 1.0)
         
         textGeometry.firstMaterial?.diffuse.contents = UIColor.red
         
-        let textNode = SCNNode(geometry: textGeometry)
+        textNode = SCNNode(geometry: textGeometry)
         
         textNode.position = SCNVector3(position.x, position.y + 0.01, position.z)
         
